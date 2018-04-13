@@ -1,0 +1,149 @@
+##配置 
+	# 配置用户名和邮箱
+	$ git config --global user.name "Your Name"
+	$ git config --global user.email "email@example.com"
+	# 查看用户和邮箱配置
+	$ git config user.name
+	$ git config user.email
+	# 或者
+	$ git config --list
+	配置PGP签名私钥
+	git config --global user.signingkey <GPG-key-id>
+	# 解决乱码问题
+	$ git config --global core.quotepath false
+	# 颜色配置
+	$ git config --global color.ui true
+
+##创建和删除版本库
+	# 创建版本库
+	$ git init
+	# 删除版本库
+	把.git文件删除
+
+##添加文件及删除文件
+	# 添加一个文件
+	$ git add readme.txt                        # 工作区-->暂存区
+	$ git commit -m "wrote a readme file"       # 暂存区-->版本库 
+	# 添加所有文件
+	$ git add .
+	$ git commit -m "add all files"
+	# 删除文件
+	$ git rm test.txt
+	# 根据私钥提交
+	$ git commit -S -m "GPG-sign" 
+
+##查看工作区状态、修改内容及日志
+	# 查看工作区状态
+	$ git status
+	# 查看修改内容
+	$ git diff readme.txt
+	# 查看日志
+	$ git log
+	# 查看日志（可以显示出PGP签名）
+	git log --show-signature
+	$ git log --pretty=oneline
+	# 查看以往的命令记录
+	$ git reflog
+	
+##时光穿梭
+	# 版本库回到上一个状态
+	$ git reset --hard HEAD^
+	# 版本库回到其他状态(可以重返之后的状态，配合git log或git reflog使用)
+	$ git reset --hard 3345674
+
+##用版本库里的版本替换工作区的版本
+	# 1.还没有git add
+	# 把工作区的修改丢弃，回到最近一次git commit或git add时的状态，to discard changes in working directory
+	$ git checkout -- readme.txt
+	# 2.已经git add
+	# Git同样告诉我们，用命令git reset HEAD file可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+	$ git reset HEAD readme.txt
+	# 然后
+	$ git checkout -- readme.txt
+
+##连接远程库
+	# 创建sshkey
+	$ ssh-keygen -t rsa -C "youremail@example.com"
+	# 登陆GitHub，打开“settings”，“SSH Keys”页面：然后，点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容
+	# 添加远程库
+	$ git remote add origin git@github.com:saitama233/lxf-gitlearning
+	# 把本地内容推送到远程库（第一次需要加-u参数，之后就不需要了）
+	# 如果git push有冲突，可以先git pull解决冲突，再git push
+	$ git push -u origin master
+	# 把远程库克隆到本地
+	$ git clone git@github.com:saitama233/lxf-gitlearning
+	# 查看远程库
+	$ git remote
+	# 查看远程库（显示更详细的信息）
+	$ git remote -v
+	指定本地dev分支与远程origin/dev分支的链接
+	$ git branch --set-upstream dev origin/dev
+
+##分支管理
+	# 创建分支
+	$ git branch <name>
+	# 切换分支
+	$ git checkout <name>
+	# 创建+切换分支
+	$ git checkout -b <name>
+	# 删除分支
+	$ git branch -d <name>
+	# 强行删除分支（即删除还没有合并过的分支）
+	# 查看分支
+	$ git branch
+
+	# 合并某分支到当前分支
+	# 1.Fast forward模式，但这种模式下，删除分支后，会丢掉分支信息。
+	$ git merge <name>
+	# 2.加上--no-ff参数就可以用普通模式合并，合并后的历史有分支，能看出来曾经做过合并
+	$ git merge --no-ff -m "merge with no-ff" dev
+	
+##分支中的冲突
+	# 先查看状态
+	$ git status
+	# 然后修改冲突文件
+	$ vi readme.txt
+	
+##stash功能（把当前还未提交的工作现场“储藏”起来，然后切换到其他分支工作，之后回来再恢复现场）
+	# 暂存
+	$ git stash
+	# 恢复现场
+	# 1.一种方式是用git stash pop，恢复的同时把stash内容也删了
+	# （这种貌似只能恢复到最后一个）
+	$ git stash pop
+	# 2.另一种方式是用git stash apply恢复，但是恢复后，stash内容并不删除，你需要用git stash drop来删除
+	# 这种可以指定恢复到哪个stash状态
+	$ $ git stash apply stash@{0}
+	
+##标签管理
+	# 创建标签（为当前commit）
+	$ git tag v1.0
+	# 创建标签（为其他commit）
+	$ git tag v0.9 6224937
+	# 创建带说明文字的标签
+	$ git tag -a v0.1 -m "version 0.1 released" 3628164
+	# 用PGP私钥签名一个标签
+	# 1.-s使用默认私钥
+	$ git tag -s v0.2 -m "signed version 0.2 released" fec145a
+	# 2.-u指定私钥
+	$ git tag -u FCC61057 v0.2 -m "signed version 0.2" 3a367e8
+	# 推送某个标签到远程服务器
+	$ git push origin v1.0
+	# 推送所有标签到远程服务器
+	$ git push origin --tags
+	# 删除标签
+	$ git tag -d v0.1
+	# 删除远程的标签
+	$ git tag -d v0.1
+	$ git push origin :refs/tags/v0.9
+	# 显示某个标签
+	$ git show v0.9
+	# 显示所有标签
+	$ git tag
+
+##设置别名
+	# --global参数是全局参数，也就是这些命令在这台电脑的所有Git仓库下都有用。
+	# 用st来代替status
+	$ git config --global alias.st status
+	# 用lg来代替那一长串
+	$ git config --global alias.lg "log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
