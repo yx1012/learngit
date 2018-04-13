@@ -9,3 +9,4 @@ creating a new branch is quick AND simple
 >>>>>>> featurel
 creating a new branch and simple 
 manage branch
+bug
